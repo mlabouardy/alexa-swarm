@@ -17,10 +17,15 @@ type AlexaRequest struct {
 		Type   string `json:"type"`
 		Time   string `json:"timestamp"`
 		Intent struct {
-			Name               string `json:"name"`
-			ConfirmationStatus string `json:"confirmationstatus"`
+			Name  string          `json:"name"`
+			Slots map[string]Slot `json:"slots"`
 		} `json:"intent"`
 	} `json:"request"`
+}
+
+type Slot struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 type AlexaResponse struct {
@@ -55,16 +60,15 @@ func HandleRequest(ctx context.Context, r AlexaRequest) (AlexaResponse, error) {
 
 	resp := CreateResponse()
 
-	if r.Request.Type == "LaunchRequest" {
-		resp.Say("Welcome to containers world. Say 'Deploy a new Swarm cluster' to begin", false)
-	}
-
 	switch r.Request.Intent.Name {
 	case "Deploy":
-		resp.SessionAttributes["clusterSize"] = 4
 		resp.Say("How many nodes do you want?", false)
 	case "ClusterSize":
-		resp.Say(fmt.Sprintf("Thanks for selecting the size %d", r.Session.Attributes["clusterSize"]), true)
+		resp.SessionAttributes = make(map[string]interface{}, 1)
+		resp.SessionAttributes["clusterSize"] = r.Request.Intent.Slots["size"]
+		resp.Say("What do you want to name your cluster?", false)
+	case "ClusterName":
+		resp.Say(fmt.Sprintf("Thanks for selecting the size %v", r.Session.Attributes["clusterSize"]), true)
 	case "AMAZON.HelpIntent":
 		resp.Say("Welcome to containers world. Say 'Deploy a new Swarm cluster' to begin", false)
 	default:
