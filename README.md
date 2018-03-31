@@ -15,6 +15,8 @@ conversation:
 
 ## Setup AWS Roles
 
+
+
 ## Lambda Functions:
 
 ### Setup Infrasturcture
@@ -108,3 +110,8 @@ dynamodb table:
 
 $ /c/Users/Mohamed/go/bin/build-lambda-zip.exe -o main.zip main
 $ GOOS=linux GOARCH=amd64 go build -o main
+
+
+## Lisence
+
+MIT
