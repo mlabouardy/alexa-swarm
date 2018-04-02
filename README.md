@@ -112,6 +112,10 @@ $ /c/Users/Mohamed/go/bin/build-lambda-zip.exe -o main.zip main
 $ GOOS=linux GOARCH=amd64 go build -o main
 
 
-## Lisence
+## Licence
 
 MIT
+
+## Maintainers
+
+* Mohamed Labouardy
