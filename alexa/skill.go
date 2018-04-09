@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/aws/aws-lambda-go/lambda"
 )
@@ -23,7 +24,13 @@ func HandleRequest(ctx context.Context, r AlexaRequest) (AlexaResponse, error) {
 	case "ClusterName":
 		clusterSize := r.Session.Attributes["clusterSize"]
 		clusterName := r.Request.Intent.Slots["cluster"].Value
-		resp.Say(fmt.Sprintf("Sure, your %v cluster with %v nodes is being created", clusterName, clusterSize), true)
+		count, _ := strconv.ParseInt(clusterSize.(string), 10, 64)
+		err := deployInfrastructure(count, clusterName)
+		if err != nil {
+			resp.Say(err.Error(), true)
+		} else {
+			resp.Say(fmt.Sprintf("Sure, your %v cluster with %v nodes is being created", clusterName, clusterSize), true)
+		}
 	case "AMAZON.HelpIntent":
 		resp.Say(welcomeMessage, false)
 	case "AMAZON.StopIntent":
