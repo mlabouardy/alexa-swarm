@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -34,7 +33,6 @@ type Instance struct {
 }
 
 func executeCommand(instanceIds []string, command string) (string, error) {
-	document := "AWS-RunShellScript"
 	cfg, err := external.LoadDefaultAWSConfig()
 	if err != nil {
 		return "", err
@@ -42,7 +40,7 @@ func executeCommand(instanceIds []string, command string) (string, error) {
 	svc := ssm.New(cfg)
 	req := svc.SendCommandRequest(&ssm.SendCommandInput{
 		InstanceIds:  instanceIds,
-		DocumentName: &document,
+		DocumentName: aws.String("AWS-RunShellScript"),
 		Parameters: map[string][]string{
 			"commands": []string{command},
 		},
@@ -127,10 +125,9 @@ func swarmJoinWorker(instanceIds []string, masterIp string, token string) error 
 
 func getSQSMessage(cfg aws.Config) (string, Cluster, error) {
 	cluster := Cluster{}
-	queueURL := os.Getenv("SQS_URL")
 	svc := sqs.New(cfg)
 	req := svc.ReceiveMessageRequest(&sqs.ReceiveMessageInput{
-		QueueUrl: &queueURL,
+		QueueUrl: aws.String(os.Getenv("SQS_URL")),
 	})
 	result, err := req.Send()
 	if err != nil {
@@ -141,10 +138,9 @@ func getSQSMessage(cfg aws.Config) (string, Cluster, error) {
 }
 
 func deleteSQSMessage(cfg aws.Config, receiptHandler string) error {
-	queueURL := os.Getenv("SQS_URL")
 	svc := sqs.New(cfg)
 	req := svc.DeleteMessageRequest(&sqs.DeleteMessageInput{
-		QueueUrl:      &queueURL,
+		QueueUrl:      aws.String(os.Getenv("SQS_URL")),
 		ReceiptHandle: &receiptHandler,
 	})
 	_, err := req.Send()
@@ -155,22 +151,18 @@ func deleteSQSMessage(cfg aws.Config, receiptHandler string) error {
 }
 
 func updateDynamoDB(cfg aws.Config, id string) error {
-	tableName := os.Getenv("TABLE_NAME")
-
-	updateExpression := "set ClusterStatus = :s"
-	clusterStatus := "Done"
 	svc := dynamodb.New(cfg)
 	req := svc.UpdateItemRequest(&dynamodb.UpdateItemInput{
-		TableName: &tableName,
+		TableName: aws.String(os.Getenv("TABLE_NAME")),
 		Key: map[string]dynamodb.AttributeValue{
 			"ID": dynamodb.AttributeValue{
 				S: &id,
 			},
 		},
-		UpdateExpression: &updateExpression,
+		UpdateExpression: aws.String("set ClusterStatus = :s"),
 		ExpressionAttributeValues: map[string]dynamodb.AttributeValue{
 			":s": dynamodb.AttributeValue{
-				S: &clusterStatus,
+				S: aws.String("Done"),
 			},
 		},
 	})
@@ -179,47 +171,4 @@ func updateDynamoDB(cfg aws.Config, id string) error {
 		return err
 	}
 	return nil
-}
-
-func main() {
-	cfg, err := external.LoadDefaultAWSConfig()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	receiptHandler, cluster, err := getSQSMessage(cfg)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	master := cluster.Instances[0]
-	workers := cluster.Instances[1:]
-
-	err = swarmInit(master.ID)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	token, err := swarmWorkerToken(master.ID)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(token)
-
-	for _, worker := range workers {
-		err = swarmJoinWorker([]string{worker.ID}, master.IP, token)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	err = updateDynamoDB(cfg, cluster.ID)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = deleteSQSMessage(cfg, receiptHandler)
-	if err != nil {
-		log.Fatal(err)
-	}
 }

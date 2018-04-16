@@ -34,22 +34,28 @@ type DBItem struct {
 }
 
 func setupInfrastructure(cfg aws.Config, name string, count int64) (Cluster, error) {
-	imageID := os.Getenv("AMI")
-	keyName := os.Getenv("KEYPAIR")
-	ssmRoleName := os.Getenv("SSM_ROLE_NAME")
-	securityGroupID := os.Getenv("SECURITY_GROUP_ID")
-
 	svc := ec2.New(cfg)
 	req := svc.RunInstancesRequest(&ec2.RunInstancesInput{
-		ImageId:      &imageID,
+		ImageId:      aws.String(os.Getenv("AMI")),
 		InstanceType: ec2.InstanceTypeT1Micro,
-		KeyName:      &keyName,
+		KeyName:      aws.String(os.Getenv("KEYPAIR")),
 		MaxCount:     &count,
 		MinCount:     &count,
 		IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
-			Name: &ssmRoleName,
+			Name: aws.String(os.Getenv("SSM_ROLE_NAME")),
 		},
-		SecurityGroupIds: []string{securityGroupID},
+		SecurityGroupIds: []string{os.Getenv("SECURITY_GROUP_ID")},
+		TagSpecifications: []ec2.TagSpecification{
+			ec2.TagSpecification{
+				ResourceType: ec2.ResourceTypeInstance,
+				Tags: []ec2.Tag{
+					ec2.Tag{
+						Key:   aws.String("Name"),
+						Value: aws.String(name),
+					},
+				},
+			},
+		},
 	})
 	result, err := req.Send()
 	if err != nil {
@@ -72,13 +78,12 @@ func setupInfrastructure(cfg aws.Config, name string, count int64) (Cluster, err
 }
 
 func pushToSQS(cfg aws.Config, cluster Cluster) error {
-	queueURL := os.Getenv("SQS_URL")
 	data, _ := json.Marshal(cluster)
 	raw := string(data)
 	svc := sqs.New(cfg)
 	req := svc.SendMessageRequest(&sqs.SendMessageInput{
 		MessageBody: &raw,
-		QueueUrl:    &queueURL,
+		QueueUrl:    aws.String(os.Getenv("SQS_URL")),
 	})
 	_, err := req.Send()
 	if err != nil {
@@ -88,8 +93,6 @@ func pushToSQS(cfg aws.Config, cluster Cluster) error {
 }
 
 func insertToDynamoDB(cfg aws.Config, cluster Cluster) error {
-	tableName := os.Getenv("TABLE_NAME")
-
 	item := DBItem{
 		ID:            cluster.ID,
 		Name:          cluster.Name,
@@ -105,7 +108,7 @@ func insertToDynamoDB(cfg aws.Config, cluster Cluster) error {
 
 	svc := dynamodb.New(cfg)
 	req := svc.PutItemRequest(&dynamodb.PutItemInput{
-		TableName: &tableName,
+		TableName: aws.String(os.Getenv("TABLE_NAME")),
 		Item:      av,
 	})
 	_, err = req.Send()

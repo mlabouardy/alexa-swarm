@@ -1,0 +1,86 @@
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "docker",
+            "intents": [
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": [
+                        "need help",
+                        "help me",
+                        "can you help me",
+                        "help"
+                    ]
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": [
+                        "exit",
+                        "stop"
+                    ]
+                },
+                {
+                    "name": "Deploy",
+                    "slots": [],
+                    "samples": [
+                        "Build a cluster",
+                        "Create a cluster",
+                        "Provision ",
+                        "Deploy",
+                        "Deploy a new swarm cluster"
+                    ]
+                },
+                {
+                    "name": "ClusterSize",
+                    "slots": [
+                        {
+                            "name": "size",
+                            "type": "AMAZON.NUMBER"
+                        }
+                    ],
+                    "samples": [
+                        "I want {size}"
+                    ]
+                },
+                {
+                    "name": "ClusterName",
+                    "slots": [
+                        {
+                            "name": "cluster",
+                            "type": "ClusterNames"
+                        }
+                    ],
+                    "samples": [
+                        "Name it {cluster}"
+                    ]
+                }
+            ],
+            "types": [
+                {
+                    "name": "ClusterNames",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "sandbox"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "production"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "staging"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

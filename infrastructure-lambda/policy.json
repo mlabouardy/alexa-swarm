@@ -1,0 +1,32 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "1",
+            "Effect": "Allow",
+            "Action": [
+                "iam:PassRole",
+                "dynamodb:PutItem",
+                "sqs:SendMessage",
+                "sqs:SetQueueAttributes"
+            ],
+            "Resource": [
+                "arn:aws:sqs:AWS_REGION:ACCOUNT_ID:QUEUE_NAME",
+                "arn:aws:iam::ACCOUNT_ID:role/SSM_ROLE_NAME",
+                "arn:aws:dynamodb:AWS_REGION:ACCOUNT_ID:table/TABLE_NAME"
+            ]
+        },
+        {
+            "Sid": "2",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogStream",
+                "ec2:CreateTags",
+                "ec2:RunInstances",
+                "logs:CreateLogGroup",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

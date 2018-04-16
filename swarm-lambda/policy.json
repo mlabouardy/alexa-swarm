@@ -1,0 +1,30 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "1",
+            "Effect": "Allow",
+            "Action": [
+                "sqs:DeleteMessage",
+                "sqs:ReceiveMessage",
+                "dynamodb:UpdateItem"
+            ],
+            "Resource": [
+                "arn:aws:sqs:AWS_REGION:ACCOUNT_ID:QUEUE_NAME",
+                "arn:aws:dynamodb:AWS_REGION:ACCOUNT_ID:table/TABLE_NAME"
+            ]
+        },
+        {
+            "Sid": "2",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:SendCommand",
+                "logs:CreateLogStream",
+                "logs:CreateLogGroup",
+                "logs:PutLogEvents",
+                "ssm:GetCommandInvocation"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

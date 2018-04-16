@@ -1,88 +1,110 @@
-/*
-- ami env variable
-- keypair env variable
+Deploy a Production-Ready Docker Swarm Cluster on AWS with Alexa.
 
-conversation:
-	welcome to swarm: orchestration bla bla
-		- swarm status
-			how many stack
-			how many service per stack
-			how many nodes
-		- deploy new swarm
-			create ec2 instances
-			convert to swarm
-*/
+# How it works
 
-## Setup AWS Roles
+Schema
 
+# Lambda Functions
 
+## Infrastructure Lambda Function
 
-## Lambda Functions:
+Description
 
-### Setup Infrasturcture
-
-* Setup an AMI with preinstalled Docker CE
-* Setup a Security group with SSH & allow inbound traffic on port 2377
-* Setup an IAM role with SSM permissions
-* Setup a SSH KeyPair
-* Setup an SQS Queue
-* Setup DynamoDB Table
+### IAM Role
 
 ```
-export AMI="ami-38f42c45"
-export KEYPAIR="vpc"
-export SSM_ROLE_NAME="SSMRole"
-export SECURITY_GROUP_ID="sg-72caf704"
-export SQS_URL="https://sqs.us-east-1.amazonaws.com/ID/SwarmQueue"
-export TABLE_NAME="clusters"
-```
-
-```
-func encodeUserData() string {
-	userData := `#/bin/sh
-	yum update -y
-	yum install -y docker
-	service docker start
-	usermod -aG docker ec2-user
-	`
-	return b64.StdEncoding.EncodeToString([]byte(userData))
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "1",
+            "Effect": "Allow",
+            "Action": [
+                "iam:PassRole",
+                "dynamodb:PutItem",
+                "sqs:SendMessage",
+                "sqs:SetQueueAttributes"
+            ],
+            "Resource": [
+                "arn:aws:sqs:AWS_REGION:ACCOUNT_ID:QUEUE_NAME",
+                "arn:aws:iam::ACCOUNT_ID:role/SSM_ROLE_NAME",
+                "arn:aws:dynamodb:AWS_REGION:ACCOUNT_ID:table/TABLE_NAME"
+            ]
+        },
+        {
+            "Sid": "2",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogStream",
+                "ec2:CreateTags",
+                "ec2:RunInstances",
+                "logs:CreateLogGroup",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "*"
+        }
+    ]
 }
 ```
 
-### Setup Swarm Cluster
+### Environment Variables
 
+| Name | Description |
+| ---- | ----------- |
+| AMI  | Amazon Machine Image ID with Docker CE pre-installed |
+| KEYPAIR | AWS SSH KeyPair |
+| SSM_ROLE_NAME | IAM Role with SSM permissions for EC2 instances |
+| SECURITY_GROUP | Security Group ID with allowed inbound traffic on 2377/tcp |
+| SQS_URL | SQS URL |
+| TABLE_NAME | DynamoDB Table name |
+
+## Swarm Lambda Function
+
+Description
+
+### IAM Role
 
 ```
-export SQS_URL="https://sqs.us-east-1.amazonaws.com/305929695733/SwarmQueue"
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "1",
+            "Effect": "Allow",
+            "Action": [
+                "sqs:DeleteMessage",
+                "sqs:ReceiveMessage",
+                "dynamodb:UpdateItem"
+            ],
+            "Resource": [
+                "arn:aws:sqs:AWS_REGION:ACCOUNT_ID:QUEUE_NAME",
+                "arn:aws:dynamodb:AWS_REGION:ACCOUNT_ID:table/TABLE_NAME"
+            ]
+        },
+        {
+            "Sid": "2",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:SendCommand",
+                "logs:CreateLogStream",
+                "logs:CreateLogGroup",
+                "logs:PutLogEvents",
+                "ssm:GetCommandInvocation"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
 ```
 
+### Environment Variables
 
-- 3 nodes
-- cluster name OK
-- Lambda 1: create infra OK
-- Lambda 1: push to sqs OK
-- Lambda 1: push to dynamodb: name, how many nodes, status OK
-- Lambda 2: get sqs OK
-- Lambda 2: swarm setup Ok
-- Lambda 1: update dynamodb with new status OK
-- Lambda 3: Swarm status OK
-- Lambda 3: get from dynamodb status OK
-- Lambda 3: get how many stacks on swarm manager
+| Name | Description |
+| ---- | ----------- |
+| SQS_URL | SQS URL |
+| TABLE_NAME | DynamoDB Table name |
 
-
-setup a dynamodb table
-insert to dynamodb
-get from dynamodb and update
-
-
-dynamodb table:
-	id
-	name
-	nodes
-	status
-	manager_ip
-
-## Going further
+# Going further
 
 * Cleanup a Swarm Cluster
 * Deploy Docker Containers
@@ -91,33 +113,12 @@ dynamodb table:
 * Deploy with multiple managers
 * etc
 
-
-## Schenario
-
-* Alexa, open docker swarm
-* Hello Mohamed, welcome to Containers universe, heres is what you can do
-	- deploy a swarm cluster A W S
-	- get state of your cluster
-	- know how many services are deploying in your cluster
-* Deploy a swarm cluster
-* sure, how many nodes do you want ?
-* 3
-* what do you want to name it ?
-* staging
-* sure, you cluster is been deploying, it will be created in virgin region
-* tell me the state of my cluster 
-
-
-$ /c/Users/Mohamed/go/bin/build-lambda-zip.exe -o main.zip main
-$ GOOS=linux GOARCH=amd64 go build -o main
-
-
-## Licence
+# Licence
 
 MIT
 
-## Maintainers
+# Maintainers
 
-* Mohamed Labouardy
+* Mohamed Labouardy <mohamed@labouardy.com>
 
-## Tutorial
+# Tutorial
