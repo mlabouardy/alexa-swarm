@@ -8,7 +8,7 @@ Schema
 
 ## Infrastructure Lambda Function
 
-Description
+Alexa interecpt user's voice
 
 ### IAM Role
 
