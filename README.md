@@ -10,8 +10,6 @@ Deploy a Production-Ready Docker Swarm Cluster on AWS with Alexa.
 
 ## Infrastructure Lambda Function
 
-Alexa interecpt user's voice
-
 ### IAM Role
 
 ```
@@ -56,13 +54,11 @@ Alexa interecpt user's voice
 | AMI  | Amazon Machine Image ID with Docker CE pre-installed |
 | KEYPAIR | AWS SSH KeyPair |
 | SSM_ROLE_NAME | IAM Role with SSM permissions for EC2 instances |
-| SECURITY_GROUP | Security Group ID with allowed inbound traffic on 2377/tcp |
+| SECURITY_GROUP | Security Group ID that allows inbound traffic on 2377/tcp |
 | SQS_URL | SQS URL |
 | TABLE_NAME | DynamoDB Table name |
 
 ## Swarm Lambda Function
-
-Description
 
 ### IAM Role
 
@@ -110,9 +106,9 @@ Description
 
 * Cleanup a Swarm Cluster
 * Deploy Docker Containers
-* Deploy Swarm in speicifc VPC
+* Deploy Swarm in private VPC
 * Change Instance Type
-* Deploy with multiple managers
+* Deploy with multiple Swarm managers
 * etc
 
 # Licence
@@ -124,3 +120,5 @@ MIT
 * Mohamed Labouardy <mohamed@labouardy.com>
 
 # Tutorial
+
+* [Deploy a Swarm Cluster with Alexa](http://www.blog.labouardy.com/deploy-a-swarm-cluster-with-alexa/)
