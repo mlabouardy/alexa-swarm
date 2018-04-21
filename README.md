@@ -122,3 +122,5 @@ MIT
 # Tutorial
 
 * [Deploy a Swarm Cluster with Alexa](http://www.blog.labouardy.com/deploy-a-swarm-cluster-with-alexa/)
+
+[![Deploy a Swarm Cluster with Alexa](https://img.youtube.com/vi/Bd63NFmjLAo/0.jpg)](https://www.youtube.com/watch?v=Bd63NFmjLAo)
