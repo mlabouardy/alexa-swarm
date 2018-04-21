@@ -2,7 +2,9 @@ Deploy a Production-Ready Docker Swarm Cluster on AWS with Alexa.
 
 # How it works
 
-Schema
+<p align="center">
+    <img src="schema.png" />
+</p>
 
 # Lambda Functions
 
