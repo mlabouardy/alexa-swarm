@@ -54,7 +54,7 @@ Deploy a Production-Ready Docker Swarm Cluster on AWS with Alexa.
 | AMI  | Amazon Machine Image ID with Docker CE pre-installed |
 | KEYPAIR | AWS SSH KeyPair |
 | SSM_ROLE_NAME | IAM Role with SSM permissions for EC2 instances |
-| SECURITY_GROUP | Security Group ID that allows inbound traffic on 2377/tcp |
+| SECURITY_GROUP | Security Group ID that allows inbound traffic on 2377/tcp and 22/tcp |
 | SQS_URL | SQS URL |
 | TABLE_NAME | DynamoDB Table name |
 
